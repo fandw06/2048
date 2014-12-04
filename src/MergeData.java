@@ -3,14 +3,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,7 +20,10 @@ import javax.swing.SwingUtilities;
  * 2048 is a small interesting game.
  *
  * @author Dawei Fan
- * @version 1.0 12/03/2014
+ * @version 1.1 12/03/2014
+ * 			1) Paint custom board and elements.
+ *
+ * 			1.0 12/03/2014
  * 			1) Directly use the screenshots as number display.
  * 			2) No animation when moving.
  *
@@ -30,9 +31,6 @@ import javax.swing.SwingUtilities;
 public class MergeData extends JPanel{
 
 	private static final long serialVersionUID = 1L;
-
-	/** Background icon. */
-	private ImageIcon bgIc;
 
 	/** Available space to put new numbers. */
 	private List<Integer> available= null;
@@ -64,12 +62,13 @@ public class MergeData extends JPanel{
 	private static final int wGrid = 15;
 	private static final int wBlock = 106;
 
-	MergeData(){
+	public MergeData(){
 		/* Do not use layout. */
 		super(null);
 		this.setSize(500, 700);
+		this.setBackground(cBoard);
 		this.setLocation(0,0);
-		this.setOpaque(false);
+		this.setOpaque(true);
 		this.setVisible(true);
 		this.setFocusable(true);
 		this.addKeyListener(new KeyListener(){
@@ -107,7 +106,6 @@ public class MergeData extends JPanel{
 
 		});
 
-		bgIc = new ImageIcon ("res/background.png");
 		initialize();
 	}
 
@@ -127,7 +125,7 @@ public class MergeData extends JPanel{
 		/** Add two numbers at the beginning. */
 		addNewNumber();
 		addNewNumber();
-		bgIc = new ImageIcon ("res/background.png");
+		setupBoard();
 	}
 
 	private void restart(){
@@ -135,6 +133,30 @@ public class MergeData extends JPanel{
 		repaint();
 		initialize();
 	}
+
+	private void setupBoard(){
+		/** Draw horizontal grids. */
+		int offset[] = {0, 0};
+		for(int i = 0; i<5; i++){
+			JPanel grid = new JPanel();
+			grid.setBackground(cGrid);
+			grid.setSize(5*wGrid+4*wBlock, wGrid);
+			grid.setLocation(offset[0], offset[1]+i*(wGrid+wBlock));
+			grid.setVisible(true);
+			this.add(grid);
+		}
+
+		/** Draw vertical grids. */
+		for(int i = 0; i<5; i++){
+			JPanel grid = new JPanel();
+			grid.setBackground(cGrid);
+			grid.setSize(wGrid, 5*wGrid+4*wBlock);
+			grid.setLocation(offset[0]+i*(wGrid+wBlock), offset[1]);
+			grid.setVisible(true);
+			this.add(grid);
+		}
+	}
+
 
 	private void addNewNumber(){
 
@@ -170,12 +192,16 @@ public class MergeData extends JPanel{
 		n.setVisible(true);
 		this.add(n);
 		repaint();
+		/** Update available list. */
+		available.remove((Object)(4*y+x));
 	}
 
 	private void removeNumberAt(int x, int y){
 		/** remove new number in GUI display. */
 		Component n = this.findComponentAt(x*(wBlock+wGrid)+wGrid, y*(wBlock + wGrid)+wGrid);
 		this.remove(n);
+		/** Update available list. */
+		available.add(4*y+x);
 		repaint();
 	}
 
@@ -252,9 +278,8 @@ public class MergeData extends JPanel{
 				if(board[i][j]!=0){
 
 					int current = j;
-					while(current>=1 && board[i][current-1]==0){
+					while(current>=1 && board[i][current-1]==0)
 						current--;
-					}
 					/**
 					 *  Now current block should be at (i, current).
 					 *  Check if its neighbor is a block and has the same number and previous not mergeed, then merge.
@@ -263,9 +288,7 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[i][current-1] += 1;
 						board[i][j] = 0;
-						/** Update available list. */
-						available.add(i*4+j);
-						/** Update the GUI. */
+						/** Update the GUI and available list. */
 						removeNumberAt(j, i);
 						removeNumberAt(current-1, i);
 						addNumberAt(current-1, i, board[i][current-1]);
@@ -278,10 +301,8 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[i][current] = board[i][j];
 						board[i][j] = 0;
-						/** Update available list. */
-						available.add(i*4+j);
-						available.remove((Object)(i*4+current));
-						/** Update the GUI. */
+
+						/** Update the GUI and available list. */
 						removeNumberAt(j, i);
 						addNumberAt(current, i, board[i][current]);
 						/** Not merged. */
@@ -306,9 +327,8 @@ public class MergeData extends JPanel{
 				if(board[i][j]!=0){
 
 					int current = j;
-					while(current<=2 && board[i][current+1]==0){
+					while(current<=2 && board[i][current+1]==0)
 						current++;
-					}
 					/**
 					 *  Now current block should be at (i, current).
 					 *  Check if its right neighbor is a block and has the same number and previous not merged, then merge.
@@ -317,9 +337,8 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[i][current+1] += 1;
 						board[i][j] = 0;
-						/** Update available list. */
-						available.add(i*4+j);
-						/** Update the GUI. */
+
+						/** Update the GUI and available list. */
 						removeNumberAt(j, i);
 						removeNumberAt(current+1, i);
 						addNumberAt(current+1, i, board[i][current+1]);
@@ -332,10 +351,8 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[i][current] = board[i][j];
 						board[i][j] = 0;
-						/** Update available list. */
-						available.add(i*4+j);
-						available.remove((Object)(i*4+current));
-						/** Update the GUI. */
+
+						/** Update the GUI and available list. */
 						removeNumberAt(j, i);
 						addNumberAt(current, i, board[i][current]);
 						/** Not merged. */
@@ -372,9 +389,8 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[current-1][i] += 1;
 						board[j][i] = 0;
-						/** Update available list. */
-						available.add(j*4+i);
-						/** Update the GUI. */
+
+						/** Update the GUI and available list. */
 						removeNumberAt(i, j);
 						removeNumberAt(i, current-1);
 						addNumberAt(i, current-1, board[current-1][i]);
@@ -387,10 +403,8 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[current][i] = board[j][i];
 						board[j][i] = 0;
-						/** Update available list. */
-						available.add(j*4+i);
-						available.remove((Object)(current*4+i));
-						/** Update the GUI. */
+
+						/** Update the GUI and available list. */
 						removeNumberAt(i, j);
 						addNumberAt(i, current, board[current][i]);
 						/** Not merged. */
@@ -426,9 +440,7 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[current+1][i] += 1;
 						board[j][i] = 0;
-						/** Update available list. */
-						available.add(j*4+i);
-						/** Update the GUI. */
+						/** Update the GUI and available list. */
 						removeNumberAt(i, j);
 						removeNumberAt(i, current+1);
 						addNumberAt(i, current+1, board[current+1][i]);
@@ -441,10 +453,8 @@ public class MergeData extends JPanel{
 						/** Update board data. */
 						board[current][i] = board[j][i];
 						board[j][i] = 0;
-						/** Update available list. */
-						available.add(j*4+i);
-						available.remove((Object)(current*4+i));
-						/** Update the GUI. */
+
+						/** Update the GUI and available list. */
 						removeNumberAt(i, j);
 						addNumberAt(i, current, board[current][i]);
 						/** Not merged. */
@@ -457,12 +467,6 @@ public class MergeData extends JPanel{
 		}
 		if(change)
 			decideStatus();
-	}
-
-	@Override
-	public void paintComponent (Graphics g){
-		super.paintComponent(g);
-		bgIc.paintIcon(this, g, 0, 0);
 	}
 
 	private void printBoard(){

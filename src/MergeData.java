@@ -1,6 +1,8 @@
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -13,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 /**
@@ -35,8 +38,24 @@ public class MergeData extends JPanel{
 	private List<Integer> available= null;
 
 	/** Picture name of all picture candidates. */
-	private final String pics[] = {"2.png",  "4.png", "8.png", "16.png", "32.png", "64.png", "128.png",
+	private static final String pics[] = {"2.png",  "4.png", "8.png", "16.png", "32.png", "64.png", "128.png",
 			"256.png", "512.png", "1024.png", "2048.png"};
+
+	private static final Color cBackground[] = {new Color(238, 228, 218), new Color(237, 224, 200),
+									new Color(242, 177, 121), new Color(245, 149, 99),
+									new Color(246, 124, 95), new Color(246, 94, 59),
+									new Color(237, 207, 114), new Color(237, 204, 97),
+									new Color(237, 200, 80), new Color(237, 197, 63),
+									new Color(252, 211, 71)};
+
+	private static final Color cForeground[] = {new Color(119, 110, 101), new Color(119, 110, 101),
+												Color.white, Color.white, Color.white, Color.white, Color.white, Color.white,
+												Color.white, Color.white, Color.white};
+
+	private static final int fontSize[] = {60, 60, 60, 60, 60, 60, 56, 56, 56, 52, 52};
+
+	private static final Color cGrid = new Color(186, 174, 161);
+	private static final Color cBoard = new Color(203, 193, 180);
 
 	/** The board data for this game. */
 	private int board[][] = null;
@@ -130,14 +149,8 @@ public class MergeData extends JPanel{
 		board[available.get(number)/4][available.get(number)%4] = value;
 
 		/** Add new number in GUI display. */
-		JLabel n = new JLabel();
-		n.setSize(wBlock, wBlock);
-		n.setIcon(new ImageIcon ("res/" + pics[value-1]));
-		n.setLocation((available.get(number)%4)*(wBlock+wGrid)+wGrid, (available.get(number)/4)*(wBlock + wGrid)+wGrid);
-		available.remove(number);
-		n.setOpaque(true);
-		n.setVisible(true);
-		this.add(n);
+		addNumberAt(available.get(number)%4, available.get(number)/4, value);
+
 		printBoard();
 		System.out.println(available);
 
@@ -147,7 +160,11 @@ public class MergeData extends JPanel{
 		/** Add new number in GUI display. */
 		JLabel n = new JLabel();
 		n.setSize(wBlock, wBlock);
-		n.setIcon(new ImageIcon ("res/" + pics[value-1]));
+		n.setBackground(cBackground[value-1]);
+		n.setForeground(cForeground[value-1]);
+		n.setText(Integer.toString((int)Math.pow(2, value)));
+		n.setFont(new Font("Microsoft Accor black", Font.PLAIN, fontSize[value-1]));
+		n.setHorizontalAlignment(SwingConstants.CENTER);
 		n.setLocation(x*(wBlock+wGrid)+wGrid, y*(wBlock + wGrid)+wGrid);
 		n.setOpaque(true);
 		n.setVisible(true);
